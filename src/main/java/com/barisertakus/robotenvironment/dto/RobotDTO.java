@@ -15,6 +15,7 @@ public class RobotDTO {
     private Integer xCoordinate;
     private Integer yCoordinate;
     private Direction direction;
+    private Boolean turnAround = false;
     private Date createdDate;
     protected Date updatedDate;
 }

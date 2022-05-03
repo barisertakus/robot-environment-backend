@@ -15,4 +15,5 @@ public class Robot extends BaseEntity{
     private Integer yCoordinate;
     @Enumerated(EnumType.STRING)
     private Direction direction;
+    private Boolean turnAround = false;
 }
