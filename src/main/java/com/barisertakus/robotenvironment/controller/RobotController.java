@@ -1,6 +1,7 @@
 package com.barisertakus.robotenvironment.controller;
 
 import com.barisertakus.robotenvironment.dto.RobotDTO;
+import com.barisertakus.robotenvironment.dto.ScriptDTO;
 import com.barisertakus.robotenvironment.service.RobotService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,11 @@ public class RobotController {
     @GetMapping
     public ResponseEntity<RobotDTO> getRobot() {
         return ResponseEntity.ok(robotService.getTop1());
+    }
+
+    @PostMapping
+    public ResponseEntity<RobotDTO> executeScript(@RequestBody ScriptDTO scriptDTO){
+        return ResponseEntity.ok(robotService.executeScript(scriptDTO));
     }
 
 }

@@ -77,6 +77,8 @@ public class RobotServiceImpl implements RobotService {
                 return waitRobot(scriptArray);
             case "TURNAROUND":
                 return turnAround(scriptArray);
+            case "FORWARD":
+                return forward(scriptArray);
             case "RIGHT":
             case "LEFT":
             case "UP":
@@ -173,6 +175,49 @@ public class RobotServiceImpl implements RobotService {
         Robot savedRobot = robotRepository.save(robot);
         return convertToRobotDTO(savedRobot);
     }
+
+    private RobotDTO forward(String[] scriptArray) {
+        if (!isValidNumericCommand(scriptArray)) {
+            throw incorrectScriptError();
+        }
+        return forwardRobot(scriptArray[1]);
+    }
+
+    private RobotDTO forwardRobot(String stepText) {
+        Robot robot = getLastRecord();
+        Direction direction = robot.getDirection();
+        Integer stepCount = Integer.parseInt(stepText);
+        Integer x = robot.getXCoordinate();
+        Integer y = robot.getYCoordinate();
+        switch (direction) {
+            case RIGHT:
+                x = checkBorders(x + stepCount, ARENA_WIDTH);
+                break;
+            case LEFT:
+                x = checkBorders(x - stepCount, ARENA_WIDTH);
+                break;
+            case UP:
+                y = checkBorders(y - stepCount, ARENA_HEIGHT);
+                break;
+            case DOWN:
+                y = checkBorders(y + stepCount, ARENA_HEIGHT);
+                break;
+        }
+        robot.setXCoordinate(x);
+        robot.setYCoordinate(y);
+        Robot savedRobot = robotRepository.save(robot);
+        return convertToRobotDTO(savedRobot);
+    }
+
+    private Integer checkBorders(Integer previousPosition, Integer limit) {
+        int value = previousPosition % limit;
+        if (value < 0) {
+            Integer absValue = Math.abs(value);
+            return limit - absValue;
+        }
+        return value;
+    }
+
 
     @Override
     public Boolean saveRobot(Robot robot) {
