@@ -35,6 +35,10 @@ public class RobotServiceImpl implements RobotService {
         return convertToRobotDTO(robot);
     }
 
+    private Robot getLastRecord() {
+        return robotRepository.findTop1By();
+    }
+
     @Override
     public RobotDTO updateRobot(RobotDTO robotDTO) {
         Robot robot = robotRepository.findTop1By();
@@ -42,7 +46,7 @@ public class RobotServiceImpl implements RobotService {
         Robot savedRobot = robotRepository.save(updatedRobot);
         return convertToRobotDTO(savedRobot);
     }
-
+    
     private Robot updateRobotFields(Robot robot, RobotDTO robotDTO) {
         robot.setDirection(robotDTO.getDirection());
         robot.setXCoordinate(robotDTO.getXCoordinate());
@@ -69,8 +73,12 @@ public class RobotServiceImpl implements RobotService {
         switch (command) {
             case "POSITION":
                 return setInitialPosition(scriptArray);
+            case "WAIT":
+                return waitRobot(scriptArray);
+            case "TURNAROUND":
+                return turnAround(scriptArray);
             default:
-                return null;
+                throw incorrectScriptError();
         }
     }
 
@@ -117,6 +125,34 @@ public class RobotServiceImpl implements RobotService {
         return robot;
     }
 
+    private RobotDTO waitRobot(String[] scriptArray) {
+        if (!isValidSingleCommand(scriptArray)) {
+            throw incorrectScriptError();
+        }
+        return closeTurnAround();
+    }
+
+    private RobotDTO closeTurnAround(){
+        Robot robot = getLastRecord();
+        robot.setTurnAround(false);
+        Robot savedRobot = robotRepository.save(robot);
+        return convertToRobotDTO(savedRobot);
+    }
+
+    private RobotDTO turnAround(String[] scriptArray) {
+        if (!isValidSingleCommand(scriptArray)) {
+            throw incorrectScriptError();
+        }
+        return turnedRobot();
+    }
+
+    private RobotDTO turnedRobot() {
+        Robot robot = getLastRecord();
+        Boolean previousTurn = robot.getTurnAround();
+        robot.setTurnAround(!previousTurn);
+        Robot savedRobot = robotRepository.save(robot);
+        return convertToRobotDTO(savedRobot);
+    }
     @Override
     public Boolean saveRobot(Robot robot) {
         robotRepository.save(robot);
