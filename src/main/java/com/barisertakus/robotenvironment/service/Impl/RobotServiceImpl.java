@@ -23,6 +23,20 @@ public class RobotServiceImpl implements RobotService {
     public RobotDTO getTop1() {
         Robot robot = robotRepository.findTop1By();
     @Override
+    public RobotDTO updateRobot(RobotDTO robotDTO) {
+        Robot robot = robotRepository.findTop1By();
+        Robot updatedRobot = updateRobotFields(robot, robotDTO);
+        Robot savedRobot = robotRepository.save(updatedRobot);
+        return convertToRobotDTO(savedRobot);
+    }
+
+    @Override
+    public Boolean saveRobot(Robot robot) {
+        robotRepository.save(robot);
+        return true;
+    }
+
+    @Override
     public Boolean saveFirstRobot() {
         if (!robotRepository.existsById(1L)) {
             Robot robot = new Robot();
