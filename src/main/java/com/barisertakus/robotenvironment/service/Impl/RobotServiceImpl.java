@@ -2,6 +2,7 @@ package com.barisertakus.robotenvironment.service.Impl;
 
 import com.barisertakus.robotenvironment.dto.RobotDTO;
 import com.barisertakus.robotenvironment.entity.Robot;
+import com.barisertakus.robotenvironment.enums.Direction;
 import com.barisertakus.robotenvironment.repository.RobotRepository;
 import com.barisertakus.robotenvironment.service.RobotService;
 import org.modelmapper.ModelMapper;
@@ -21,6 +22,19 @@ public class RobotServiceImpl implements RobotService {
     @Override
     public RobotDTO getTop1() {
         Robot robot = robotRepository.findTop1By();
+    @Override
+    public Boolean saveFirstRobot() {
+        if (!robotRepository.existsById(1L)) {
+            Robot robot = new Robot();
+            robot.setXCoordinate(0);
+            robot.setYCoordinate(0);
+            robot.setDirection(Direction.RIGHT);
+            robotRepository.save(robot);
+            return true;
+        }
+        return false;
+    }
+
         return modelMapper.map(robot, RobotDTO.class);
     }
 }
