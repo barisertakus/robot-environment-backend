@@ -46,7 +46,7 @@ public class RobotServiceImpl implements RobotService {
         Robot savedRobot = robotRepository.save(updatedRobot);
         return convertToRobotDTO(savedRobot);
     }
-    
+
     private Robot updateRobotFields(Robot robot, RobotDTO robotDTO) {
         robot.setDirection(robotDTO.getDirection());
         robot.setXCoordinate(robotDTO.getXCoordinate());
@@ -77,6 +77,11 @@ public class RobotServiceImpl implements RobotService {
                 return waitRobot(scriptArray);
             case "TURNAROUND":
                 return turnAround(scriptArray);
+            case "RIGHT":
+            case "LEFT":
+            case "UP":
+            case "DOWN":
+                return changeDirection(scriptArray);
             default:
                 throw incorrectScriptError();
         }
@@ -153,6 +158,22 @@ public class RobotServiceImpl implements RobotService {
         Robot savedRobot = robotRepository.save(robot);
         return convertToRobotDTO(savedRobot);
     }
+
+    private RobotDTO changeDirection(String[] scriptArray) {
+        if (!isValidSingleCommand(scriptArray)) {
+            throw incorrectScriptError();
+        }
+        return setRobotDirection(scriptArray[0]);
+    }
+
+    private RobotDTO setRobotDirection(String directionText) {
+        Robot robot = getLastRecord();
+        Direction direction = Direction.findByValue(directionText);
+        robot.setDirection(direction);
+        Robot savedRobot = robotRepository.save(robot);
+        return convertToRobotDTO(savedRobot);
+    }
+
     @Override
     public Boolean saveRobot(Robot robot) {
         robotRepository.save(robot);
