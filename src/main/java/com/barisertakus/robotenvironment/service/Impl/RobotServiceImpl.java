@@ -6,6 +6,7 @@ import com.barisertakus.robotenvironment.entity.Robot;
 import com.barisertakus.robotenvironment.enums.Direction;
 import com.barisertakus.robotenvironment.repository.RobotRepository;
 import com.barisertakus.robotenvironment.service.RobotService;
+import com.barisertakus.robotenvironment.utils.NumberUtils;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,12 @@ public class RobotServiceImpl implements RobotService {
     @Value("${ARENA_WIDTH}")
     private Integer ARENA_WIDTH;
 
+    private final Integer singleCommandLength = 1;
+
+    private final Integer numericCommandLength = 2;
+
+    private final String positionCommandNum = "1";
+
     public RobotServiceImpl(RobotRepository robotRepository, ModelMapper modelMapper) {
         this.robotRepository = robotRepository;
         this.modelMapper = modelMapper;
@@ -39,20 +46,6 @@ public class RobotServiceImpl implements RobotService {
         return robotRepository.findTop1By();
     }
 
-    @Override
-    public RobotDTO updateRobot(RobotDTO robotDTO) {
-        Robot robot = robotRepository.findTop1By();
-        Robot updatedRobot = updateRobotFields(robot, robotDTO);
-        Robot savedRobot = robotRepository.save(updatedRobot);
-        return convertToRobotDTO(savedRobot);
-    }
-
-    private Robot updateRobotFields(Robot robot, RobotDTO robotDTO) {
-        robot.setDirection(robotDTO.getDirection());
-        robot.setXCoordinate(robotDTO.getXCoordinate());
-        robot.setYCoordinate(robotDTO.getYCoordinate());
-        return robot;
-    }
 
     private IllegalArgumentException incorrectScriptError() {
         log.error("The script was entered incorrectly.");
@@ -61,9 +54,7 @@ public class RobotServiceImpl implements RobotService {
 
     @Override
     public RobotDTO executeScript(ScriptDTO scriptDTO) {
-        String scriptText = scriptDTO.getScriptText();
-        String script = scriptText.toUpperCase();
-        String[] scriptArray = script.split(" ");
+        String[] scriptArray = getScriptArrayFromScript(scriptDTO);
         String command = scriptArray[0];
 
         if (!isValidScriptText(scriptArray)) {
@@ -87,27 +78,33 @@ public class RobotServiceImpl implements RobotService {
             default:
                 throw incorrectScriptError();
         }
+
     }
 
+    private String[] getScriptArrayFromScript(ScriptDTO scriptDTO){
+        String scriptText = scriptDTO.getScriptText();
+        String script = scriptText.toUpperCase();
+        return script.split(" ");
+    }
 
     private Boolean isValidScriptText(String[] scriptArray) {
-        return scriptArray.length < 3;
+        return scriptArray.length <= numericCommandLength;
     }
 
     private Boolean isValidPositionCommand(String[] scriptArray) {
-        return isValidCommandLength(scriptArray) && scriptArray[1].equals("1");
+        return isValidCommandLength(scriptArray) && scriptArray[1].equals(positionCommandNum);
     }
 
     private Boolean isValidNumericCommand(String[] scriptArray) {
-        return isValidCommandLength(scriptArray) && isNumeric(scriptArray[1]);
+        return isValidCommandLength(scriptArray) && NumberUtils.isNumeric(scriptArray[1]);
     }
 
     private Boolean isValidCommandLength(String[] scriptArray) {
-        return scriptArray.length == 2;
+        return scriptArray.length == numericCommandLength;
     }
 
     private Boolean isValidSingleCommand(String[] scriptArray) {
-        return scriptArray.length == 1;
+        return scriptArray.length == singleCommandLength;
     }
 
     private RobotDTO setInitialPosition(String[] scriptArray) {
@@ -139,7 +136,7 @@ public class RobotServiceImpl implements RobotService {
         return closeTurnAround();
     }
 
-    private RobotDTO closeTurnAround(){
+    private RobotDTO closeTurnAround() {
         Robot robot = getLastRecord();
         robot.setTurnAround(false);
         Robot savedRobot = robotRepository.save(robot);
@@ -185,44 +182,37 @@ public class RobotServiceImpl implements RobotService {
 
     private RobotDTO forwardRobot(String stepText) {
         Robot robot = getLastRecord();
-        Direction direction = robot.getDirection();
         Integer stepCount = Integer.parseInt(stepText);
-        Integer x = robot.getXCoordinate();
-        Integer y = robot.getYCoordinate();
-        switch (direction) {
-            case RIGHT:
-                x = checkBorders(x + stepCount, ARENA_WIDTH);
-                break;
-            case LEFT:
-                x = checkBorders(x - stepCount, ARENA_WIDTH);
-                break;
-            case UP:
-                y = checkBorders(y - stepCount, ARENA_HEIGHT);
-                break;
-            case DOWN:
-                y = checkBorders(y + stepCount, ARENA_HEIGHT);
-                break;
-        }
-        robot.setXCoordinate(x);
-        robot.setYCoordinate(y);
-        Robot savedRobot = robotRepository.save(robot);
+        Robot savedRobot = setCoordinates(robot, stepCount);
         return convertToRobotDTO(savedRobot);
     }
 
-    private Integer checkBorders(Integer previousPosition, Integer limit) {
-        int value = previousPosition % limit;
-        if (value < 0) {
-            Integer absValue = Math.abs(value);
-            return limit - absValue;
+    private Robot setCoordinates(Robot robot, Integer stepCount) {
+        switch (robot.getDirection()) {
+            case RIGHT:
+                robot.setXCoordinate(checkBorders(robot.getXCoordinate() + stepCount, ARENA_WIDTH));
+                break;
+            case LEFT:
+                robot.setXCoordinate(checkBorders(robot.getXCoordinate() - stepCount, ARENA_WIDTH));
+                break;
+            case UP:
+                robot.setYCoordinate(checkBorders(robot.getYCoordinate() - stepCount, ARENA_HEIGHT));
+                break;
+            case DOWN:
+                robot.setYCoordinate(checkBorders(robot.getYCoordinate() + stepCount, ARENA_HEIGHT));
+                break;
         }
-        return value;
+        return robotRepository.save(robot);
     }
 
+    private int checkBorders(int previousPosition, int limit) {
+        int position = previousPosition % limit;
+        if (position >= 0) {
+            return position;
+        }
 
-    @Override
-    public Boolean saveRobot(Robot robot) {
-        robotRepository.save(robot);
-        return true;
+        int absPosition = Math.abs(position);
+        return limit - absPosition;
     }
 
     @Override
@@ -241,21 +231,5 @@ public class RobotServiceImpl implements RobotService {
     private RobotDTO convertToRobotDTO(Robot robot) {
         return modelMapper.map(robot, RobotDTO.class);
     }
-
-    public static boolean isNumeric(String string) {
-        int intValue;
-
-        if (string == null || string.equals("")) {
-            return false;
-        }
-
-        try {
-            intValue = Integer.parseInt(string);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
 
 }
