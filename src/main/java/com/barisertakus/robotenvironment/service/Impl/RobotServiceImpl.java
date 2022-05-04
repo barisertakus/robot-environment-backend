@@ -120,8 +120,8 @@ public class RobotServiceImpl implements RobotService {
     private RobotDTO setInitialAndSaveRobot() {
         Robot lastRecord = getLastRecord();
         Robot robot = setInitialRobotFields(lastRecord);
-        Robot savedRobot = robotRepository.save(robot);
-        return convertToRobotDTO(savedRobot);
+        robotRepository.save(robot);
+        return convertToRobotDTO(robot);
     }
 
     private Robot setInitialRobotFields(Robot robot) {
