@@ -21,3 +21,8 @@
 - The TurnAround function, which triggers the robot to turn around itself, was implemented.
 - Create a new robot and save it if there is not one when the application is launched.
 - Checking and running the script was added.
+
+### 04.05.2022
+- JUnit and Mockito libraries were used for unit testing.
+- Different cases of the script, such as null or empty, were tested.
+- Various test cases were prepared about many of the commands sent with the script.
