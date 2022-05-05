@@ -8,7 +8,10 @@ import com.barisertakus.robotenvironment.repository.RobotRepository;
 import com.barisertakus.robotenvironment.service.Impl.RobotServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +29,9 @@ public class RobotServiceTest {
         robotRepositoryMock = mock(RobotRepository.class);
         modelMapper = new ModelMapper();
         robotService = new RobotServiceImpl(robotRepositoryMock, modelMapper);
+        ReflectionTestUtils.setField(robotService, "ARENA_HEIGHT", 5);
+        ReflectionTestUtils.setField(robotService, "ARENA_WIDTH", 5);
+
     }
 
     @Test
@@ -116,6 +122,61 @@ public class RobotServiceTest {
         assertThat(robotDTO.getTurnAround())
                 .as("WAIT command expect turnAround is false")
                 .isEqualTo(false);
+    }
+
+    @Test
+    public void givenScript_whenDirectionWithMoreCommands_thenThrowScriptError() {
+        ScriptDTO script = createScript("DOWN MORE");
+        Throwable throwable = catchThrowable(() -> robotService.executeScript(script));
+        checkIncorrectScript(throwable);
+    }
+
+    @Test
+    public void givenScript_whenDirectionDownWithoutCommand_thenReturnChangeDirectionAsDown() {
+        ScriptDTO script = createScript("DOWN");
+        Robot robot = createRobot(); // Direction is left by default for this case
+        when(robotRepositoryMock.findTop1By()).thenReturn(robot);
+        RobotDTO robotDTO = robotService.executeScript(script);
+
+        assertThat(robotDTO.getDirection())
+                .as("DOWN command expect direction is down")
+                .isEqualTo(Direction.DOWN);
+    }
+
+    @Test
+    public void givenScript_whenDirectionRightWithoutCommand_thenReturnChangeDirectionAsRight() {
+        ScriptDTO script = createScript("RIGHT");
+        Robot robot = createRobot(); // TurnAround is true by default for this case
+        when(robotRepositoryMock.findTop1By()).thenReturn(robot);
+        RobotDTO robotDTO = robotService.executeScript(script);
+
+        assertThat(robotDTO.getDirection())
+                .as("RIGHT command expect direction is right")
+                .isEqualTo(Direction.RIGHT);
+    }
+
+    @Test
+    public void givenScript_whenForwardOneStep_thenDecreaseXPosition() {
+        Robot robot = createRobot(); // X is 2 by default for this case
+        ScriptDTO script = createScript("FORWARD 1");
+        when(robotRepositoryMock.findTop1By()).thenReturn(robot);
+        RobotDTO robotDTO = robotService.executeScript(script);
+
+        assertThat(robotDTO.getXCoordinate())
+                .as("FORWARD 1 command expect X is 1")
+                .isEqualTo(1);
+    }
+
+    @Test
+    public void givenScript_whenForwardTwoStep_thenDecreaseXPosition() {
+        Robot robot = createRobot(); // X is 2 by default for this case
+        ScriptDTO script = createScript("FORWARD 2");
+        when(robotRepositoryMock.findTop1By()).thenReturn(robot);
+        RobotDTO robotDTO = robotService.executeScript(script);
+
+        assertThat(robotDTO.getXCoordinate())
+                .as("FORWARD 2 command expect X is 0")
+                .isEqualTo(0);
     }
 
     private void checkIncorrectScript(Throwable throwable) {

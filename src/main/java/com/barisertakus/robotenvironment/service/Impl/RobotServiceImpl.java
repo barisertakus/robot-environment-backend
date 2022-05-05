@@ -190,8 +190,8 @@ public class RobotServiceImpl implements RobotService {
     private RobotDTO forwardRobot(String stepText) {
         Robot robot = getLastRecord();
         Integer stepCount = Integer.parseInt(stepText);
-        Robot savedRobot = setCoordinates(robot, stepCount);
-        return convertToRobotDTO(savedRobot);
+        setCoordinates(robot, stepCount);
+        return convertToRobotDTO(robot);
     }
 
     private Robot setCoordinates(Robot robot, Integer stepCount) {
