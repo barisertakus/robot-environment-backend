@@ -2,7 +2,7 @@
 
 
 ### 30.04.2022
-- SpringBoot was used to create a new application. 
+- SpringBoot was used to create a new application.
 - The analysis of documents and projects was completed.
 - PostgreSQL was used as the database.
 
@@ -27,18 +27,22 @@
 - Different cases of the script, such as null or empty, were tested.
 - Various test cases were prepared about many of the commands sent with the script.
 
+### 05.05.2022
+- Added Swagger ui to view API access points.
+- Instructions were included in the README on how to use the API.
+
 
 ## API Reference
 
 ### API Address
 
-```http
+```
   http://robot-demo.herokuapp.com/
 ```
 
 #### Get the robot's last position.
 
-```http
+```
   GET /api/robot
 ```
 
@@ -64,7 +68,7 @@
 
 #### Give commands to the robot via script.
 
-```http
+```
   POST /api/robot
 ```
 
