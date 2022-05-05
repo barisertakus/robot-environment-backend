@@ -146,8 +146,8 @@ public class RobotServiceImpl implements RobotService {
     private RobotDTO closeTurnAround() {
         Robot robot = getLastRecord();
         robot.setTurnAround(false);
-        Robot savedRobot = robotRepository.save(robot);
-        return convertToRobotDTO(savedRobot);
+        robotRepository.save(robot);
+        return convertToRobotDTO(robot);
     }
 
     private RobotDTO turnAround(String[] scriptArray) {
@@ -161,8 +161,8 @@ public class RobotServiceImpl implements RobotService {
         Robot robot = getLastRecord();
         Boolean previousTurn = robot.getTurnAround();
         robot.setTurnAround(!previousTurn);
-        Robot savedRobot = robotRepository.save(robot);
-        return convertToRobotDTO(savedRobot);
+        robotRepository.save(robot);
+        return convertToRobotDTO(robot);
     }
 
     private RobotDTO changeDirection(String[] scriptArray) {
@@ -176,8 +176,8 @@ public class RobotServiceImpl implements RobotService {
         Robot robot = getLastRecord();
         Direction direction = Direction.findByValue(directionText);
         robot.setDirection(direction);
-        Robot savedRobot = robotRepository.save(robot);
-        return convertToRobotDTO(savedRobot);
+        robotRepository.save(robot);
+        return convertToRobotDTO(robot);
     }
 
     private RobotDTO forward(String[] scriptArray) {
