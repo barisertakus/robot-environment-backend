@@ -26,3 +26,67 @@
 - JUnit and Mockito libraries were used for unit testing.
 - Different cases of the script, such as null or empty, were tested.
 - Various test cases were prepared about many of the commands sent with the script.
+
+
+## API Reference
+
+### API Address
+
+```http
+  http://robot-demo.herokuapp.com/
+```
+
+#### Get the robot's last position.
+
+```http
+  GET /api/robot
+```
+
+| Parameter | Type   | Description |
+|:----------|:-------|:------------|
+| `none`    | `none` | `none`      |
+
+
+#### Response example
+
+```
+{
+  "createdDate": "2022-05-05T01:06:53.924Z",
+  "direction": "DOWN",
+  "id": 1,
+  "turnAround": true,
+  "updatedDate": "2022-05-05T01:06:53.924Z",
+  "xcoordinate": 0,
+  "ycoordinate": 0
+}
+
+```
+
+#### Give commands to the robot via script.
+
+```http
+  POST /api/robot
+```
+
+##### Request Body
+
+
+| Parameter    | Type     | Description                         |
+|:-------------|:---------|:------------------------------------|
+| `scriptText` | `string` | The command to be sent to the robot |
+
+
+#### Response example
+
+```
+{
+  "createdDate": "2022-05-05T01:06:53.924Z",
+  "direction": "RIGHT",
+  "id": 1,
+  "turnAround": true,
+  "updatedDate": "2022-05-05T01:06:53.924Z",
+  "xcoordinate": 3,
+  "ycoordinate": 2
+}
+
+```
