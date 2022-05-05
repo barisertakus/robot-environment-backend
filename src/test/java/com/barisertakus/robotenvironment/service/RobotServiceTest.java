@@ -27,23 +27,50 @@ public class RobotServiceTest {
     }
 
     @Test
-    public void testPositionScript(){
+    public void givenScript_whenLengthGreaterThanLimit_thenThrowScriptError(){
 
+        ScriptDTO script = createScript("SCRIPT LENGTH 3");
+        Throwable throwable = catchThrowable(()->robotService.executeScript(script));
+        assertThat(throwable)
+                .as("Incorrect Script Error")
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The script was entered incorrectly.");
+    }
+
+    @Test
+    public void givenScript_whenEmpty_thenThrowScriptError(){
+
+        ScriptDTO script = createScript("");
+        Throwable throwable = catchThrowable(()->robotService.executeScript(script));
+        assertThat(throwable)
+                .as("Incorrect Script Error")
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The script was entered incorrectly.");
+    }
+
+    @Test
+    public void givenScript_whenNull_thenThrowScriptError(){
+
+        Throwable throwable = catchThrowable(()->robotService.executeScript(null));
+        assertThat(throwable)
+                .as("Incorrect Script Error")
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The script was entered incorrectly.");
+    }
+
+    private Robot createRobot(){
         Robot robot = new Robot();
-        robot.setXCoordinate(4);
-        robot.setYCoordinate(4);
+        robot.setXCoordinate(2);
+        robot.setYCoordinate(2);
         robot.setDirection(Direction.LEFT);
         robot.setTurnAround(true);
-
-        ScriptDTO scriptDTO = new ScriptDTO();
-        scriptDTO.setScriptText("POSITION 1");
-
-        when(robotRepositoryMock.findTop1By())
-                .thenReturn(robot);
-
-        assertThat(robotService.executeScript(scriptDTO).getXCoordinate())
-                .as("Test position X = 0")
-                .isEqualTo(0);
-
+        return robot;
     }
+
+    private ScriptDTO createScript(String script){
+        ScriptDTO scriptDTO = new ScriptDTO();
+        scriptDTO.setScriptText(script);
+        return scriptDTO;
+    }
+
 }

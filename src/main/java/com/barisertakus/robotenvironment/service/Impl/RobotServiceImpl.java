@@ -82,6 +82,13 @@ public class RobotServiceImpl implements RobotService {
     }
 
     private String[] getScriptArrayFromScript(ScriptDTO scriptDTO){
+        if(scriptDTO == null){
+            throw incorrectScriptError();
+        }
+        return generateScriptArray(scriptDTO);
+    }
+
+    private String[] generateScriptArray(ScriptDTO scriptDTO){
         String scriptText = scriptDTO.getScriptText();
         String script = scriptText.toUpperCase();
         return script.split(" ");
